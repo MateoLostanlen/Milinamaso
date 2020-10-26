@@ -11,7 +11,7 @@ from torch import nn
 
 from contiguous_params import ContiguousParams
 
-from .utils import freeze_bn
+from .utils import freeze_model
 
 
 __all__ = ['Trainer', 'ClassificationTrainer']
