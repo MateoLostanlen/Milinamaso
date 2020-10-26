@@ -18,8 +18,6 @@ from .utils import freeze_bn, freeze_model
 __all__ = ['Trainer', 'ClassificationTrainer']
 
 
-
-
 class Trainer:
 
     def __init__(self, model, train_loader, val_loader, criterion, optimizer,
@@ -38,7 +36,7 @@ class Trainer:
         self.step = 0
         self.start_epoch = 0
         self.epoch = 0
-        self.train_loss=0
+        self.train_loss = 0
         self.train_loss_recorder = []
         self.val_loss_recorder = []
         self.min_loss = math.inf
@@ -96,7 +94,7 @@ class Trainer:
             freeze_until (str): last layer to freeze
             mb (fastprogress.master_bar): primary progress bar
         """
-        #self.model = freeze_bn(self.model.train())
+        # self.model = freeze_bn(self.model.train())
         self.train_loss = 0
         self.model.train()
         pb = progress_bar(self.train_loader, parent=mb)
@@ -105,7 +103,7 @@ class Trainer:
 
             # Forward
             batch_loss = self._get_loss(x, target)
-            self.train_loss+=batch_loss.item()
+            self.train_loss += batch_loss.item()
 
             # Backprop
             self._backprop_step(batch_loss)
@@ -115,10 +113,9 @@ class Trainer:
 
             self.step += 1
         self.epoch += 1
-        #print(self.train_loss,len(self.train_loader),self.train_loss/len(self.train_loader))
-        self.train_loss/=len(self.train_loader)
+        # print(self.train_loss,len(self.train_loader),self.train_loss/len(self.train_loader))
+        self.train_loss /= len(self.train_loader)
         self.train_loss_recorder.append(self.train_loss)
-        
 
     def to_cuda(self, x, target):
         """Move input and target to GPU"""
@@ -225,8 +222,8 @@ class Trainer:
            num_it (int, optional): number of iterations to perform
         """
 
-        if len(self.train_loader)<num_it:
-            print("Can't reach", num_it,"iterations, num_it is now", len(self.train_loader))
+        if len(self.train_loader) < num_it:
+            print("Can't reach", num_it, "iterations, num_it is now", len(self.train_loader))
             num_it = len(self.train_loader)
 
         self.model = freeze_model(self.model.train(), freeze_until)
@@ -253,13 +250,13 @@ class Trainer:
             if batch_idx + 1 == num_it:
                 break
 
-    def showBatch(self,nb_images=None, nrow=4, fig_size_X=15, fig_size_Y=15, normalize=True):
+    def showBatch(self, nb_images=None, nrow=4, fig_size_X=15, fig_size_Y=15, normalize=True):
 
         x, target = next(iter(self.train_loader))
 
         if(nb_images):
-            x=x[:nb_images,:,:,:]
-            target=target[:nb_images]
+            x = x[:nb_images, :, :, :]
+            target = target[:nb_images]
 
         images = make_grid(x, nrow=nrow)  # the default nrow is 8
 
@@ -311,8 +308,6 @@ class Trainer:
         plt.legend(loc='lower right')
         plt.show()
 
-
-
     def check_setup(self, freeze_until=None, lr=3e-4, num_it=100):
         """Check whether you can overfit one batch
 
@@ -343,7 +338,6 @@ class Trainer:
             prev_loss = batch_loss.item()
 
         return True
-
 
 
 class ClassificationTrainer(Trainer):
@@ -379,8 +373,8 @@ class ClassificationTrainer(Trainer):
             # Loss computation
             val_loss += self.criterion(out, target).item()
 
-            if out.shape[1] > 1: #Multiclass
-                #print(out.t(), target)
+            if out.shape[1] > 1:  # Multiclass
+
                 pred = out.topk(1, dim=1)[1]
                 correct = pred.eq(target.view(-1, 1).expand_as(pred))
                 top1 += correct[:, 0].sum().item()
@@ -389,19 +383,18 @@ class ClassificationTrainer(Trainer):
                     pred = out.topk(5, dim=1)[1]
                     top5 += correct.any(dim=1).sum().item()
 
-            else: #Binary
-                top1+=torch.sum(abs(target - sigmoid(out)) < 0.5).item()
+            else:  # Binary
+                top1 += torch.sum(abs(target - sigmoid(out)) < 0.5).item()
 
             num_samples += x.shape[0]
 
             self.val_loss_recorder.append(val_loss/num_samples)
 
         val_loss /= len(self.val_loader)
-        return dict(train_loss = self.train_loss, val_loss=val_loss, acc1=top1 / num_samples, acc5=top5 / num_samples)
+        return dict(train_loss=self.train_loss, val_loss=val_loss, acc1=top1 / num_samples, acc5=top5 / num_samples)
 
-    @staticmethod 
+    @staticmethod
     def _eval_metrics_str(eval_metrics):
         return (f"Training loss: {eval_metrics['train_loss']:.4} "
                 f"Validation loss: {eval_metrics['val_loss']:.4} "
                 f"(Acc@1: {eval_metrics['acc1']:.2%}, Acc@5: {eval_metrics['acc5']:.2%})")
-
