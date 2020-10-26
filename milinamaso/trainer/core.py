@@ -3,7 +3,6 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import torch
 from torch.optim.lr_scheduler import OneCycleLR, CosineAnnealingLR, MultiplicativeLR
-from torchvision.ops.boxes import box_iou
 from fastprogress import master_bar, progress_bar
 from torchvision.utils import make_grid
 from torchvision import transforms
@@ -12,7 +11,7 @@ from torch import nn
 
 from contiguous_params import ContiguousParams
 
-from .utils import freeze_bn, freeze_model
+from .utils import freeze_bn
 
 
 __all__ = ['Trainer', 'ClassificationTrainer']
@@ -88,7 +87,8 @@ class Trainer:
         self.model.load_state_dict(state['model'])
 
     def _fit_epoch(self, freeze_until, mb):
-        """Fit a single epoch
+        """
+        Fit a single epoch
 
         Args:
             freeze_until (str): last layer to freeze
@@ -118,7 +118,7 @@ class Trainer:
         self.train_loss_recorder.append(self.train_loss)
 
     def to_cuda(self, x, target):
-        """Move input and target to GPU"""
+        """Move input and target to GPU !"""
         if isinstance(self.gpu, int):
             if self.gpu >= torch.cuda.device_count():
                 raise ValueError("Invalid device index")
@@ -341,6 +341,7 @@ class Trainer:
 
 
 class ClassificationTrainer(Trainer):
+
     """Image classification trainer class
 
     Args:
@@ -360,7 +361,6 @@ class ClassificationTrainer(Trainer):
         Returns:
             dict: evaluation metrics
         """
-
         self.model.eval()
         sigmoid = nn.Sigmoid()
 

@@ -5,10 +5,8 @@ from tempfile import NamedTemporaryFile
 import torch
 import torch.nn as nn
 from holocron.nn import GlobalAvgPool2d
-from torchvision.models.detection import fasterrcnn_resnet50_fpn
 from milinamaso import trainer
 import platform
-import os
 
 
 class MockClassificationDataset(torch.utils.data.Dataset):

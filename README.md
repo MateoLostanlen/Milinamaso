@@ -5,15 +5,14 @@
 
 The goal of this repo is to gather everything necessary to train a computer vision model.
 
-This repository is based on https://github.com/frgfm/Holocron, you should look at it first.
-
+This repository is based on <https://github.com/frgfm/Holocron>, you should look at it first.
 
 ## Getting started
 
 ### Prerequisites
 
-- Python 3.6 (or more recent)
-- [pip](https://pip.pypa.io/en/stable/)
+  - Python 3.6 (or more recent)
+  - [pip](<https://pip.pypa.io/en/stable/>)
 
 ### Installation
 
