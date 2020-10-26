@@ -131,7 +131,7 @@ class Trainer:
 
     @staticmethod
     def _to_cuda(x, target):
-        """Move input and target to GPU"""
+        """Move input and target to GPU !"""
         x = x.cuda(non_blocking=True)
         target = target.cuda(non_blocking=True)
         return x, target
@@ -346,7 +346,8 @@ class Trainer:
 
 class ClassificationTrainer(Trainer):
 
-    """Image classification trainer class
+    """
+    Image classification trainer class
 
     Args:
         model (torch.nn.Module): model to train
@@ -360,7 +361,8 @@ class ClassificationTrainer(Trainer):
 
     @torch.no_grad()
     def evaluate(self):
-        """Evaluate the model on the validation set
+        """
+        Evaluate the model on the validation set
 
         Returns:
             dict: evaluation metrics
