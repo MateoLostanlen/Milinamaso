@@ -1,5 +1,5 @@
 milinamaso.trainer
-================
+==================
 
 .. automodule:: milinamaso.trainer
 
