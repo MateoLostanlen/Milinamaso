@@ -51,13 +51,13 @@ requirements = [
 
 setup(
     name=package_name,
-    version=version,
+    version='0.1.1',
     author='Mateo Lostanlen',
     description='Everything necessary to train a computer vision model in PyTorch',
     long_description=readme,
     long_description_content_type="text/markdown",
-    url='hhttps://github.com/MateoLostanlen/Milinamaso',
-    download_url='https://github.com/MateoLostanlen/Milinamaso/archive/v_1.0.tar.gz',
+    url='https://github.com/MateoLostanlen/Milinamaso',
+    download_url='https://github.com/MateoLostanlen/Milinamaso/archive/v_0.1.0.tar.gz',
     license='MIT',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
