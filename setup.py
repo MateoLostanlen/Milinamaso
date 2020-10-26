@@ -57,7 +57,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url='hhttps://github.com/MateoLostanlen/Milinamaso',
-    download_url='',
+    download_url='https://github.com/MateoLostanlen/Milinamaso/archive/v_1.0.tar.gz',
     license='MIT',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
