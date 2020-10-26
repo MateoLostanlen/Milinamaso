@@ -39,7 +39,6 @@ with open('README.md') as f:
     readme = f.read()
 
 requirements = [
-	'pylocron>=0.1.2',
     'torch>=1.5.1',
     'torchvision>=0.6.1',
     'tqdm>=4.1.0',
@@ -47,6 +46,7 @@ requirements = [
     'fastprogress>=1.0.0',
     'matplotlib>=3.0.0',
     'contiguous_params@git+https://github.com/philjd/contiguous_pytorch_params.git#egg=contiguous_params',
+    'pylocron@git+https://github.com/frgfm/Holocron.git#egg=holocron'
 ]
 
 setup(
