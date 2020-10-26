@@ -105,3 +105,6 @@ venv.bak/
 holocron/version.py
 *.pth
 conda-dist/
+
+# Vscode
+.vscode/

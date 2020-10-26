@@ -26,8 +26,8 @@ copyright = f"{datetime.now().year}, Mateo Lostanlen"
 author = 'Mateo Lostanlen'
 
 # The full version, including alpha/beta/rc tags
-version = holocron.__version__
-release = holocron.__version__ + '-git'
+version = milinamaso.__version__
+release = milinamaso.__version__ + '-git'
 
 
 # -- General configuration ---------------------------------------------------
