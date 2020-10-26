@@ -46,7 +46,8 @@ class Trainer:
         self._reset_opt(self.optimizer.defaults['lr'])
 
     def set_device(self, gpu):
-        """Move tensor objects to the target GPU
+        """
+        Move tensor objects to the target GPU
 
         Args:
             gpu (int): index of the target GPU device
@@ -62,7 +63,8 @@ class Trainer:
                 self.criterion = self.criterion.cuda()
 
     def save(self, output_file):
-        """Save a trainer checkpoint
+        """
+        Save a trainer checkpoint
 
         Args:
             output_file (str): destination file path
@@ -74,7 +76,8 @@ class Trainer:
                    _use_new_zipfile_serialization=False)
 
     def load(self, state):
-        """Resume from a trainer state
+        """
+        Resume from a trainer state
 
         Args:
             state (dict): checkpoint dictionary
@@ -151,7 +154,7 @@ class Trainer:
         self._params = ContiguousParams([p for p in self.model.parameters() if p.requires_grad])
 
     def _reset_opt(self, lr):
-        """Reset the target params of the optimizer"""
+        """Reset the target params of the optimizer !"""
         self.optimizer.defaults['lr'] = lr
         self.optimizer.state = defaultdict(dict)
         self.optimizer.param_groups = []
@@ -175,7 +178,8 @@ class Trainer:
             raise ValueError(f"The following scheduler type is not supported: {sched_type}")
 
     def fit_n_epochs(self, num_epochs, lr, freeze_until=None, sched_type='onecycle'):
-        """Train the model for a given number of epochs
+        """
+        Train the model for a given number of epochs
 
         Args:
             num_epochs (int): number of epochs to train
@@ -213,7 +217,8 @@ class Trainer:
                 self.save(self.output_file)
 
     def lr_find(self, freeze_until=None, start_lr=1e-7, end_lr=1, num_it=100):
-        """Gridsearch the optimal learning rate for the training
+        """
+        Gridsearch the optimal learning rate for the training
 
         Args:
            freeze_until (str, optional): last layer to freeze
@@ -221,7 +226,6 @@ class Trainer:
            end_lr (float, optional): final learning rate
            num_it (int, optional): number of iterations to perform
         """
-
         if len(self.train_loader) < num_it:
             print("Can't reach", num_it, "iterations, num_it is now", len(self.train_loader))
             num_it = len(self.train_loader)
@@ -275,13 +279,13 @@ class Trainer:
         plt.imshow(np.transpose(im_inv.numpy(), (1, 2, 0)))
 
     def plot_recorder(self, beta=0.95, block=True):
-        """Display the results of the LR grid search
+        """
+        Display the results of the LR grid search
 
         Args:
             beta (float, optional): smoothing factor
             block (bool, optional): whether the plot should block execution
         """
-
         if len(self.lr_recorder) != len(self.loss_recorder) or len(self.lr_recorder) == 0:
             raise AssertionError("Please run the `lr_find` method first")
 
@@ -309,14 +313,14 @@ class Trainer:
         plt.show()
 
     def check_setup(self, freeze_until=None, lr=3e-4, num_it=100):
-        """Check whether you can overfit one batch
+        """
+        Check whether you can overfit one batch
 
         Args:
             freeze_until (str, optional): last layer to freeze
             lr (float, optional): learning rate to be used for training
             num_it (int, optional): number of iterations to perform
         """
-
         self.model = freeze_model(self.model.train(), freeze_until)
         # Update param groups & LR
         self._reset_opt(lr)

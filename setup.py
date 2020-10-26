@@ -1,9 +1,7 @@
 #!usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""
-Package installation setup
-"""
+"""Package installation setup !"""
 
 import os
 import subprocess

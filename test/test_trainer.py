@@ -10,6 +10,7 @@ import platform
 
 
 class MockClassificationDataset(torch.utils.data.Dataset):
+
     """Mock dataset generating a random sample and a fixed zero target"""
     def __init__(self, n):
         super().__init__()
@@ -23,6 +24,7 @@ class MockClassificationDataset(torch.utils.data.Dataset):
 
 
 class MockSegDataset(torch.utils.data.Dataset):
+
     """Mock dataset generating a random sample and a fixed zero target"""
     def __init__(self, n):
         super().__init__()
@@ -36,6 +38,7 @@ class MockSegDataset(torch.utils.data.Dataset):
 
 
 class MockDetDataset(torch.utils.data.Dataset):
+    
     """Mock dataset generating a random sample and a fixed zero target"""
     def __init__(self, n):
         super().__init__()

@@ -5,7 +5,8 @@ __all__ = ['freeze_bn', 'freeze_model']
 
 
 def freeze_bn(mod):
-    """Prevents parameter and stats from updating in Batchnorm layers that are frozen
+    """
+    Prevents parameter and stats from updating in Batchnorm layers that are frozen
 
     Args:
         mod (torch.nn.Module): model to train
@@ -13,7 +14,6 @@ def freeze_bn(mod):
     Returns:
         torch.nn.Module: model
     """
-
     # Loop on modules
     for m in mod.modules():
         if isinstance(m, _BatchNorm) and m.affine and all(not p.requires_grad for p in m.parameters()):
@@ -25,7 +25,8 @@ def freeze_bn(mod):
 
 
 def freeze_model(model, last_frozen_layer=None, frozen_bn_stat_update=False):
-    """Freeze a specific range of model layers
+    """
+    Freeze a specific range of model layers
 
     Args:
         model (torch.nn.Module): model to train
@@ -35,7 +36,6 @@ def freeze_model(model, last_frozen_layer=None, frozen_bn_stat_update=False):
     Returns:
         torch.nn.Module: model
     """
-
     #train FC
     for param in model.parameters():
         param.requires_grad_(True)
