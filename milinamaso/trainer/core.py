@@ -262,8 +262,8 @@ class Trainer:
 
         # Inverse normalize the images
         inv_normalize = transforms.Normalize(
-            mean=[-0.485/0.229, -0.456/0.224, -0.406/0.225],
-            std=[1/0.229, 1/0.224, 1/0.225]
+            mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225],
+            std=[1 / 0.229, 1 / 0.224, 1 / 0.225]
         )
         if normalize:
             im_inv = inv_normalize(images)
@@ -388,7 +388,7 @@ class ClassificationTrainer(Trainer):
 
             num_samples += x.shape[0]
 
-            self.val_loss_recorder.append(val_loss/num_samples)
+            self.val_loss_recorder.append(val_loss / num_samples)
 
         val_loss /= len(self.val_loader)
         return dict(train_loss=self.train_loss, val_loss=val_loss, acc1=top1 / num_samples, acc5=top5 / num_samples)
