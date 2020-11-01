@@ -8,10 +8,13 @@ from torchvision.utils import make_grid
 from torchvision import transforms
 import numpy as np
 from torch import nn
+import os
 
 from contiguous_params import ContiguousParams
 
 from .utils import freeze_model
+
+import wandb
 
 
 __all__ = ['Trainer', 'ClassificationTrainer']
@@ -20,8 +23,10 @@ __all__ = ['Trainer', 'ClassificationTrainer']
 class Trainer:
 
     def __init__(self, model, train_loader, val_loader, criterion, optimizer,
-                 gpu=None, output_file='./checkpoint.pth', acc_threshold=0.05):
+                 gpu=None, output_file='./checkpoint.pth', acc_threshold=0.5, wb=None):
+
         self.model = model
+        self.wb = wb
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.criterion = criterion
@@ -32,6 +37,7 @@ class Trainer:
         self.output_file = output_file
 
         # Initialize
+        self.example_ct=0
         self.step = 0
         self.start_epoch = 0
         self.epoch = 0
@@ -69,25 +75,11 @@ class Trainer:
         Args:
             output_file (str): destination file path
         """
-        torch.save(dict(epoch=self.epoch, step=self.step, min_loss=self.min_loss,
-                        optimizer=self.optimizer.state_dict(),
-                        model=self.model.state_dict()),
-                   output_file,
-                   _use_new_zipfile_serialization=False)
+        if self.wb:
+            torch.save(self.model.state_dict(), os.path.join(wandb.run.dir, output_file))
+        else:
+            torch.save(self.model.state_dict(), output_file)
 
-    def load(self, state):
-        """
-        Resume from a trainer state
-
-        Args:
-            state (dict): checkpoint dictionary
-        """
-        self.start_epoch = state['epoch']
-        self.epoch = self.start_epoch
-        self.step = state['step']
-        self.min_loss = state['min_loss']
-        self.optimizer.load_state_dict(state['optimizer'])
-        self.model.load_state_dict(state['model'])
 
     def _fit_epoch(self, freeze_until, mb):
         """
@@ -103,7 +95,7 @@ class Trainer:
         pb = progress_bar(self.train_loader, parent=mb)
         for x, target in pb:
             x, target = self.to_cuda(x, target)
-
+            self.example_ct +=  x.shape[0]
             # Forward
             batch_loss = self._get_loss(x, target)
             self.train_loss += batch_loss.item()
@@ -115,6 +107,14 @@ class Trainer:
             pb.comment = f"Training loss: {batch_loss.item():.4}"
 
             self.step += 1
+
+            # Report metrics every 20th batch
+            if self.step % 5 == 0:
+                # where the magic happens
+                if self.wb:
+                    wandb.log({"epoch": self.epoch, "train_loss": batch_loss.item()}, step=self.example_ct)
+   
+
         self.epoch += 1
         # print(self.train_loss,len(self.train_loader),self.train_loss/len(self.train_loader))
         self.train_loss /= len(self.train_loader)
@@ -187,6 +187,10 @@ class Trainer:
             freeze_until (str, optional): last layer to freeze
             sched_type (str, optional): type of scheduler to use
         """
+
+        if self.wb:
+          wandb.watch(self.model, self.criterion, log="all", log_freq=10)
+
         self.epoch = 0
         self.train_loss_recorder = []
         self.val_loss_recorder = []
@@ -214,6 +218,9 @@ class Trainer:
                 print(f"Validation loss decreased {self.min_loss:.4} --> "
                       f"{eval_metrics['val_loss']:.4}: saving state...")
                 self.min_loss = eval_metrics['val_loss']
+                if self.wb:
+                    wandb.log({"best_val_loss": self.min_loss})
+                    wandb.log({"best_val_acc": eval_metrics['acc1']})
                 self.save(self.output_file)
 
     def lr_find(self, freeze_until=None, start_lr=1e-7, end_lr=1, num_it=100):
@@ -369,7 +376,7 @@ class ClassificationTrainer(Trainer):
         """
         self.model.eval()
         sigmoid = nn.Sigmoid()
-
+        useTop5 = False
         val_loss, top1, top5, num_samples = 0, 0, 0, 0
         for x, target in self.val_loader:
             x, target = self.to_cuda(x, target)
@@ -388,19 +395,35 @@ class ClassificationTrainer(Trainer):
                 if out.shape[1] >= 5:
                     pred = out.topk(5, dim=1)[1]
                     top5 += correct.any(dim=1).sum().item()
+                    useTop5 = True
 
             else:  # Binary
-                top1 += torch.sum(abs(target - sigmoid(out)) < 0.5).item()
+                top1 += torch.sum(abs(target - sigmoid(out)) < self.acc_threshold).item()
 
             num_samples += x.shape[0]
 
             self.val_loss_recorder.append(val_loss / num_samples)
 
         val_loss /= len(self.val_loader)
-        return dict(train_loss=self.train_loss, val_loss=val_loss, acc1=top1 / num_samples, acc5=top5 / num_samples)
+        if self.wb:
+            wandb.log({"val_acc": top1 / num_samples})
+            wandb.log({"val_loss": val_loss})
+
+        if useTop5:
+            return dict(train_loss=self.train_loss, val_loss=val_loss, acc1=top1 / num_samples, acc5=top5 / num_samples) 
+
+        else:
+            return dict(train_loss=self.train_loss, val_loss=val_loss, acc=top1 / num_samples)
 
     @staticmethod
     def _eval_metrics_str(eval_metrics):
-        return (f"Training loss: {eval_metrics['train_loss']:.4} "
-                f"Validation loss: {eval_metrics['val_loss']:.4} "
-                f"(Acc@1: {eval_metrics['acc1']:.2%}, Acc@5: {eval_metrics['acc5']:.2%})")
+
+        if 'acc5' in eval_metrics:
+            return (f"Training loss: {eval_metrics['train_loss']:.4} "
+                    f"Validation loss: {eval_metrics['val_loss']:.4} "
+                    f"(Acc@1: {eval_metrics['acc1']:.2%}, Acc@5: {eval_metrics['acc5']:.2%})")
+        
+        else:
+            return (f"Training loss: {eval_metrics['train_loss']:.4} "
+                    f"Validation loss: {eval_metrics['val_loss']:.4} "
+                    f"Acc: {eval_metrics['acc']:.2%}")
